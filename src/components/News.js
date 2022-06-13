@@ -21,7 +21,6 @@ const News = (props) => {
     const data = await fetch(url);
     props.showProgress(50);
     const parsedData = await data.json();
-    // document.title = `${capital(props.category)} - NewsGeek`;
     setarticles(parsedData.articles)
     settotalArticles(parsedData.totalResults)
     setloading(false)
@@ -29,6 +28,7 @@ const News = (props) => {
   }
 
   useEffect(() => {
+    document.title = `${capital(props.category)} - NewsGeek`;
     updateNews();
   }, [])
 
@@ -57,7 +57,7 @@ const News = (props) => {
 
     return (
       <>
-        <h1 className="my-4 text-center">{`NewsGeek - Top ${capital(
+        <h1 className="my-4 text-center" style={{paddingTop: "60px"}}>{`NewsGeek - Top ${capital(
           props.category
         )} Headlines`}</h1>
         {loading && <Spinner />}
