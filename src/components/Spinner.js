@@ -1,7 +1,6 @@
-import React, { Component } from 'react'
+import React from 'react'
 
-export class Spinner extends Component {
-  render() {
+const Spinner = () => {
     return (
       <div className='container text-center my-3'>
         <div className="spinner-border" role="status">
@@ -10,6 +9,5 @@ export class Spinner extends Component {
       </div>
     )
   }
-}
 
 export default Spinner

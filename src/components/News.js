@@ -1,54 +1,36 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import PropTypes from "prop-types";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-export class News extends Component {
-  static defaultProps = {
-    country: "in",
-    pageSize: 20,
-    category: "general",
-  };
+const News = (props) => {
 
-  static propTypes = {
-    country: PropTypes.string,
-    pageSize: PropTypes.number,
-    category: PropTypes.string,
-  };
+  const [articles, setarticles] = useState([]);
+  const [loading, setloading] = useState(true);
+  const [page, setpage] = useState(1)
+  const [totalArticles, settotalArticles] = useState(0)
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      articles: [],
-      loading: true,
-      page: 1,
-      totalArticles: 0,
-    };
-    document.title = `${this.capital(this.props.category)} - NewsGeek`;
-  }
-
-  capital(word) {
+  const capital = (word) => {
     return word[0].toUpperCase() + word.slice(1);
   }
 
-  async updateNews() {
-    this.props.showProgress(10);
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&page=${this.state.page}&pageSize=${this.props.pageSize}&apiKey=${this.props.apiKey}`;
+  const updateNews = async () => {
+    props.showProgress(10);
+    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&page=${page}&pageSize=${props.pageSize}&apiKey=${props.apiKey}`;
     const data = await fetch(url);
-    this.props.showProgress(50);
+    props.showProgress(50);
     const parsedData = await data.json();
-    this.setState({
-      articles: parsedData.articles,
-      totalArticles: parsedData.totalResults,
-      loading: false,
-    });
-    this.props.showProgress(100);
+    // document.title = `${capital(props.category)} - NewsGeek`;
+    setarticles(parsedData.articles)
+    settotalArticles(parsedData.totalResults)
+    setloading(false)
+    props.showProgress(100);
   }
 
-  async componentDidMount() {
-    this.updateNews();
-  }
+  useEffect(() => {
+    updateNews();
+  }, [])
 
   // handleNextPage = async () => {
   //   this.setState({
@@ -64,33 +46,30 @@ export class News extends Component {
   //   this.updateNews();
   // };
 
-  fetchMoreData = async () => {
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&page=${this.state.page+1}&pageSize=${this.props.pageSize}&apiKey=${this.props.apiKey}`;
+  const fetchMoreData = async () => {
+    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&page=${page+1}&pageSize=${props.pageSize}&apiKey=${props.apiKey}`;
     const data = await fetch(url);
     const parsedData = await data.json();
-    this.setState({
-      articles: this.state.articles.concat(parsedData.articles),
-      totalArticles: parsedData.totalResults,
-      page: this.state.page + 1,
-    });
+    setarticles(articles.concat(parsedData.articles))
+    settotalArticles(parsedData.totalResults)
+    setpage(page + 1)
   };
 
-  render() {
     return (
       <>
-        <h1 className="my-4 text-center">{`NewsGeek - Top ${this.capital(
-          this.props.category
+        <h1 className="my-4 text-center">{`NewsGeek - Top ${capital(
+          props.category
         )} Headlines`}</h1>
-        {this.state.loading && <Spinner />}
+        {loading && <Spinner />}
         <InfiniteScroll
-          dataLength={this.state.articles.length}
-          next={this.fetchMoreData}
-          hasMore={this.state.articles.length !== this.state.totalArticles}
+          dataLength={articles.length}
+          next={fetchMoreData}
+          hasMore={articles.length !== totalArticles}
           loader={<Spinner />}
         >
           <div className="container">
         <div className="row">
-          {this.state.articles.map((article) => {
+          {articles.map((article) => {
               return (
                 <div className="col-md-4" key={article.url}>
                   <NewsItem
@@ -132,6 +111,17 @@ export class News extends Component {
       </>
     );
   }
-}
+
+News.defaultProps = {
+    country: "in",
+    pageSize: 20,
+    category: "general",
+  };
+
+News.propTypes = {
+    country: PropTypes.string,
+    pageSize: PropTypes.number,
+    category: PropTypes.string,
+  };
 
 export default News;
